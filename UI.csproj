@@ -91,16 +91,16 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Bl\Bl.csproj">
-      <Project>{6a6fc686-13a6-43aa-8e14-c8dffedcf3d1}</Project>
-      <Name>Bl</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\zero.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\cross.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Bl\Bl.csproj">
+      <Project>{6a6fc686-13a6-43aa-8e14-c8dffedcf3d1}</Project>
+      <Name>Bl</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
