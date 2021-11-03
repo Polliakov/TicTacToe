@@ -19,7 +19,6 @@ namespace TicTacToe
 
             var game = new Game();
             var gameForm = new GameForm(game);
-            game.AddUI(gameForm);
 
             Application.Run(gameForm);
         }

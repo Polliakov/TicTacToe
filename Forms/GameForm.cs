@@ -6,68 +6,57 @@ using Bl;
 
 namespace UI.Forms
 {
-    public partial class GameForm : Form, IUserInterface
+    public partial class GameForm : Form
     {
         public GameForm(IGameLogic game)
         {
             InitializeComponent();
-            
-            fieldBuilder = new FieldBuilder(pnlField);
 
-            game.UIAdded += Start;
+            this.game = game;
+            fieldBuilder = new FieldBuilder(pnlField);
+            var settings = game.GetSettings();
+
+            field = fieldBuilder.Create(settings.FieldHeight, settings.FieldWidth);
+            SubscribeOnFieldClick(settings.FieldHeight, settings.FieldWidth);
+
             game.FieldReseted += ResetField;
-            game.SettingsSent += GetNewSettings;
-            game.SettingsAccepted += CreateField;
-            game.FieldChanged += UpdateCell;
+            game.FieldRecreated += CreateNewField;
+            game.CellChanged += SetCell;
             game.PlayerChanged += ShowCurrentPlayer;
             game.Win += ShowWinner;
         }
 
-        public event Action<int, int> Input;
-        public event Action FieldReset;
-        public event Action NededSettings;
-        public event Action<Settings> SettingsRecived;
-
-        private PictureBox[,] pictureBoxes;
+        private PictureBox[,] field;
         private FieldBuilder fieldBuilder;
+        private IGameLogic game;
 
-        private void Start(Settings settings)
+        private void SetCell(int x, int y, CellState cellState)
         {
-            pictureBoxes = fieldBuilder.Create(settings.FieldHeight, settings.FieldWidth);
-            SubscribeOnPbClick(settings);
+            field[y, x].Image = (cellState == CellState.Cross) ?
+                                    Properties.Resources.cross :
+                                    Properties.Resources.zero;
         }
 
-        private void UpdateCell(int x, int y, CellState cellState)
-        {
-            pictureBoxes[y, x].Image = (cellState == CellState.Cross) ?
-                                       Properties.Resources.cross :
-                                       Properties.Resources.zero;
-        }
-
-        private void PictureBox_Click(object sender, EventArgs e)
+        private void Cell_Click(object sender, EventArgs e)
         {
             Point point = (Point)(sender as PictureBox).Tag;
-            Input?.Invoke(point.X, point.Y);
+            game.Turn(point.X, point.Y);
         }
 
         private void BtnSettings_Click(object sender, EventArgs e)
         {
-            NededSettings?.Invoke();
-        }
-
-        private void GetNewSettings(Settings settings)
-        {
+            var settings = game.GetSettings();
             var settingsForm = new SettingsForm(settings);
 
             if (settingsForm.ShowDialog() == DialogResult.OK)
             {
-                SettingsRecived?.Invoke(settingsForm.settings);
+                game.AcceptSettings(settingsForm.settings);
             }
         }
 
         private void BtnReset_Click(object sender, EventArgs e)
         {
-            FieldReset?.Invoke();
+            game.ResetField();
         }
 
         private void ShowCurrentPlayer(string playerName)
@@ -80,37 +69,40 @@ namespace UI.Forms
             MessageBox.Show(winner.ToString(), "Победитель");
         }
 
-        private void CreateField(Settings settings)
+        private void CreateNewField(int fieldHeight, int fieldWidth)
         {
             pnlField.AutoSize = false;
             AutoSize = false;
 
-            fieldBuilder.Delete(pictureBoxes);
-            pictureBoxes = fieldBuilder.Create(settings.FieldHeight, settings.FieldWidth);
-            SubscribeOnPbClick(settings);
+            fieldBuilder.Delete(field);
+            field = fieldBuilder.Create(fieldHeight, fieldWidth);
+            SubscribeOnFieldClick(fieldHeight, fieldWidth);
 
             pnlField.AutoSize = true;
             AutoSize = true;
         }
 
-        private void ResetField(Settings settings)
+        private void ResetField()
         {
-            for (int i = 0; i < settings.FieldHeight; i++)
+            int rows = field.GetLength(0);
+            int columns = field.GetLength(1);
+
+            for (int i = 0; i < rows; i++)
             {
-                for (int j = 0; j < settings.FieldWidth; j++)
+                for (int j = 0; j < columns; j++)
                 {
-                    pictureBoxes[i, j].Image = null;
+                    field[i, j].Image = null;
                 }
             }
         }
 
-        private void SubscribeOnPbClick(Settings settings)
+        private void SubscribeOnFieldClick(int fieldHeight, int fieldWidth)
         {
-            for (int i = 0; i < settings.FieldHeight; i++)
+            for (int i = 0; i < fieldHeight; i++)
             {
-                for (int j = 0; j < settings.FieldWidth; j++)
+                for (int j = 0; j < fieldWidth; j++)
                 {
-                    pictureBoxes[i, j].Click += PictureBox_Click;
+                    field[i, j].Click += Cell_Click;
                 }
             }
         }

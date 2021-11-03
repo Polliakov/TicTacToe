@@ -45,7 +45,6 @@
     <Compile Include="Checker.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="IGameLogic.cs" />
-    <Compile Include="IUserInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>

@@ -20,15 +20,12 @@ namespace Bl
             checker = new Checker(field, settings);
         }
 
-        public event Action<Settings> UIAdded;
-        public event Action<Settings> FieldReseted;
-        public event Action<Settings> SettingsSent;
-        public event Action<Settings> SettingsAccepted;
-        public event Action<int, int, CellState> FieldChanged;
+        public event Action FieldReseted;
+        public event Action<int, int> FieldRecreated;
+        public event Action<int, int, CellState> CellChanged;
         public event Action<string> PlayerChanged;
         public event Action<string> Win;
 
-        private readonly Checker checker;
         private string CurrentPlayerName
         {
             get
@@ -36,6 +33,7 @@ namespace Bl
                 return player == Player.First ? settings.Player1Name + " X" : settings.Player2Name + " O";
             }
         }
+        private readonly Checker checker;
         private Settings settings;
         private CellState[,] field;
         private Player player;
@@ -46,18 +44,19 @@ namespace Bl
             Second
         }
 
-        public void AddUI(IUserInterface ui)
+        public Settings GetSettings()
         {
-            ui.Input += Turn;
-            ui.SettingsRecived += AcceptSettings;
-            ui.FieldReset += ResetField;
-            ui.NededSettings += () => SettingsSent.Invoke(settings);
-
-            UIAdded?.Invoke(settings);
-            PlayerChanged(CurrentPlayerName);
+            return new Settings
+            {
+                Player1Name = settings.Player1Name,
+                Player2Name = settings.Player2Name,
+                FieldHeight = settings.FieldHeight,
+                FieldWidth = settings.FieldWidth,
+                WinningScore = settings.WinningScore
+            };
         }
 
-        private void Turn(int x, int y)
+        public void Turn(int x, int y)
         {
             if (field[y, x] != CellState.Empty) return;
 
@@ -66,7 +65,7 @@ namespace Bl
             cellState = (player == Player.First) ? CellState.Cross : CellState.Zero;
 
             field[y, x] = cellState;
-            FieldChanged?.Invoke(x, y, cellState);
+            CellChanged?.Invoke(x, y, cellState);
 
             if (checker.CheckWin(x, y))
             {
@@ -81,24 +80,24 @@ namespace Bl
             PlayerChanged?.Invoke(CurrentPlayerName );
         }     
 
-        private void AcceptSettings(Settings settings)
+        public void AcceptSettings(Settings settings)
         {
             this.settings = settings;
             field = new CellState[this.settings.FieldHeight, this.settings.FieldWidth];
             checker.Update(field, this.settings);
             player = Player.First;
 
-            SettingsAccepted?.Invoke(settings);
+            FieldRecreated?.Invoke(settings.FieldHeight, settings.FieldWidth);
             PlayerChanged?.Invoke(CurrentPlayerName);
         }
 
-        private void ResetField()
+        public void ResetField()
         {
             field = new CellState[settings.FieldHeight, settings.FieldWidth];
             checker.Update(field, settings);
             player = Player.First;
 
-            FieldReseted.Invoke(settings);
+            FieldReseted.Invoke();
             PlayerChanged?.Invoke(CurrentPlayerName);
         }
     }
