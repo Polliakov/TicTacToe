@@ -1,4 +1,6 @@
-﻿namespace Bl
+﻿using System.Collections.Generic;
+
+namespace Bl
 {
     public class Checker
     {
@@ -11,71 +13,73 @@
         private Settings settings;
         private CellState[,] field;
 
-        private CellState cellState;
-        private int x;
-        private int y;
-
         public void Update(CellState[,] field, Settings settings)
         {
             this.field = field;
             this.settings = settings;
         }
 
-        public bool Check(int x, int y, CellState cellState)
+        public bool CheckWin(int x, int y)
         {
-            this.x = x;
-            this.y = y;
-            this.cellState = cellState;
+            var cellState = field[y, x];
+            var lines = GetLines(x, y);
 
-            if (y - (settings.WinningScore - 1) >= 0)
+            for (int i = 0; i < 4; i++)
             {
-                if (CheckLine(-1, 0)) return true;
-            }
-            if (y + settings.WinningScore <= settings.FieldHeight)
-            {
-                if (CheckLine(1, 0)) return true;
-            }
-            if (x - (settings.WinningScore - 1) >= 0)
-            {
-                if (CheckLine(0, -1)) return true;
-            }
-            if (x + settings.WinningScore <= settings.FieldWidth)
-            {
-                if (CheckLine(0, 1)) return true;
-            }
-            if (y - (settings.WinningScore - 1) >= 0 &&
-                x - (settings.WinningScore - 1) >= 0)
-            {
-                if (CheckLine(-1, -1)) return true;
-            }
-            if (y - (settings.WinningScore - 1) >= 0 &&
-                x + settings.WinningScore <= settings.FieldWidth)
-            {
-                if (CheckLine(-1, 1)) return true;
-            }
-            if (y + settings.WinningScore <= settings.FieldHeight &&
-                x - (settings.WinningScore - 1) >= 0)
-            {
-                if (CheckLine(1, -1)) return true;
-            }
-            if (y + settings.WinningScore <= settings.FieldHeight &&
-                x + settings.WinningScore <= settings.FieldWidth)
-            {
-                if (CheckLine(1, 1)) return true;
+                if (CheckLine(lines[i], cellState)) return true;
             }
 
             return false;
         }
 
-        private bool CheckLine(int yDirection, int xDirection)
+        private bool CheckLine(List<CellState> line, CellState cellState)
         {
-            for (int i = 1; i < settings.WinningScore; i++)
+            if (line.Count < settings.WinningScore) return false;
+
+            int score = 0;
+            for (int i = 0; i < line.Count; i++)
             {
-                if (field[y + i * yDirection, x + i * xDirection] != cellState) return false;
+                if (line[i] == cellState) score++;
+                else score = 0;
+
+                if (score == settings.WinningScore) return true;
             }
 
-            return true;
+            return false;
         }
-        
+
+        private List<CellState>[] GetLines(int x, int y)
+        {
+            var lines = new List<CellState>[4];
+            for (int i = 0; i < 4; i++)
+            {
+                lines[i] = new List<CellState>();
+            }
+
+            for (int i = -(settings.WinningScore - 1); i < settings.WinningScore; i++)
+            {
+                if (x + i >= 0 && x + i < settings.FieldWidth)
+                {
+                    lines[0].Add(field[y, x + i]);
+
+                    if (y + i >= 0 && y + i < settings.FieldHeight)
+                    {
+                        lines[1].Add(field[y + i, x + i]);
+                    }
+                }
+
+                if (y + i >= 0 && y + i < settings.FieldHeight)
+                {
+                    lines[2].Add(field[y + i, x]);
+
+                    if (x - i >= 0 && x - i <settings.FieldWidth)
+                    {
+                        lines[3].Add(field[y + i, x - i]);
+                    }
+                }
+            }
+
+            return lines;
+        }
     }
 }

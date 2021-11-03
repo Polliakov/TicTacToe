@@ -68,7 +68,7 @@ namespace Bl
             field[y, x] = cellState;
             FieldChanged?.Invoke(x, y, cellState);
 
-            if (checker.Check(x, y, cellState))
+            if (checker.CheckWin(x, y))
             {
                 Win?.Invoke(CurrentPlayerName);
                 ResetField();
