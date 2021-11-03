@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameForm));
             this.btnSettings = new System.Windows.Forms.Button();
             this.btnReset = new System.Windows.Forms.Button();
             this.pnlField = new System.Windows.Forms.Panel();
@@ -89,6 +90,7 @@
             this.Controls.Add(this.pnlField);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.btnSettings);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "GameForm";
             this.Padding = new System.Windows.Forms.Padding(12);
             this.Text = "Крестики-Нолики";
