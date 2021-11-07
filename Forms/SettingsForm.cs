@@ -11,14 +11,7 @@ namespace UI.Forms
         {
             InitializeComponent();
 
-            this.settings = new Settings
-            {
-                Player1Name = settings.Player1Name,
-                Player2Name = settings.Player2Name,
-                FieldHeight = settings.FieldHeight,
-                FieldWidth = settings.FieldWidth,
-                WinningScore = settings.WinningScore
-            };
+            this.settings = new Settings(settings);
 
             tbPlayer1Name.Text = settings.Player1Name;
             tbPlayer2Name.Text = settings.Player2Name;

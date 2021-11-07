@@ -6,14 +6,7 @@ namespace Bl
     {
         public Game()
         {
-            settings = new Settings
-            {
-                Player1Name = "Крестики",
-                Player2Name = "Нолики",
-                FieldHeight = 19,
-                FieldWidth = 19,
-                WinningScore = 5
-            };
+            settings = new Settings();
             player = Player.First;
 
             field = new CellState[settings.FieldHeight, settings.FieldWidth];
@@ -46,18 +39,15 @@ namespace Bl
 
         public Settings GetSettings()
         {
-            return new Settings
-            {
-                Player1Name = settings.Player1Name,
-                Player2Name = settings.Player2Name,
-                FieldHeight = settings.FieldHeight,
-                FieldWidth = settings.FieldWidth,
-                WinningScore = settings.WinningScore
-            };
+            return new Settings(settings);
         }
 
         public void Turn(int x, int y)
         {
+            if (x < 0 || y < 0 || x >= settings.FieldWidth || y >= settings.FieldHeight)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
             if (field[y, x] != CellState.Empty) return;
 
             CellState cellState;
